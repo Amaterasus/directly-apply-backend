@@ -20,7 +20,8 @@ func HandleRequests(port string) {
 	myRouter.HandleFunc("/authorised", authorised).Methods("GET")
 	myRouter.HandleFunc("/signup", signUp).Methods("POST")
 
-	cors := handlers.AllowedOrigins([]string{"*"})
+	corsOrigins := handlers.AllowedOrigins([]string{"*"})
+	corsHeaders := handlers.AllowedHeaders([]string{"Authorised"})
 	
-	log.Fatal(http.ListenAndServe(":" + port, handlers.CORS(cors)(myRouter)))
+	log.Fatal(http.ListenAndServe(":" + port, handlers.CORS(corsOrigins, corsHeaders)(myRouter)))
 }
