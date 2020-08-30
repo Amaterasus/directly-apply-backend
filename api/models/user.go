@@ -44,6 +44,27 @@ func InitialUserMigration() {
 	db.AutoMigrate(&User{})
 }
 
+func (user *User) Authorise(name, password string) bool {
+	db, err := gorm.Open("postgres", os.Getenv("DATABASE_URL"))
+
+	if err != nil {
+		fmt.Println(err.Error())
+		panic("Failed to connect to DataBase")
+	}
+
+	defer db.Close()
+
+	db.Where("name = ?", name).Find(&user)
+
+	jwt, _ := GenerateJWT(user.ID)
+
+	user.Jwt = jwt
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password))
+
+	return err == nil 
+}
+
 func GenerateJWT(id string) (string, error) {
 
 	secret := os.Getenv("SECRET")

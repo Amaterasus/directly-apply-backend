@@ -16,8 +16,10 @@ func HandleRequests(port string) {
 
 	myRouter := mux.NewRouter().StrictSlash(true)
 
+	myRouter.HandleFunc("/wakeup", wakeup).Methods("GET")
 	myRouter.HandleFunc("/users", allUsers).Methods("GET")
 	myRouter.HandleFunc("/authorised", authorised).Methods("GET")
+	myRouter.HandleFunc("/login", login).Methods("POST")
 	myRouter.HandleFunc("/signup", signUp).Methods("POST")
 
 	corsOrigins := handlers.AllowedOrigins([]string{"*"})
