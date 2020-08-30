@@ -55,7 +55,6 @@ func (user *User) Authorise(name, password string) bool {
 	defer db.Close()
 
 	db.Where("name = ?", name).Find(&user)
-
 	jwt, _ := GenerateJWT(user.ID)
 
 	user.Jwt = jwt
@@ -75,7 +74,7 @@ func GenerateJWT(id string) (string, error) {
 
 	claims["authorized"] = true
 	claims["id"] = id
-    claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+    claims["expiration"] = time.Now().Add(time.Minute * 30).Unix()
 
     tokenString, err := token.SignedString([]byte(secret))
 
@@ -88,14 +87,16 @@ func GenerateJWT(id string) (string, error) {
 }
 
 func DecodeJWT(token string) string {
-	decode, _ := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		something, ok := token.Method.(*jwt.SigningMethodHMAC); 
+	
+	decodedToken, _ := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC); 
 		if !ok {
 			return nil, fmt.Errorf("There was an error")
 		}
-		return something, nil
+		secret := os.Getenv("SECRET")
+		return []byte(secret), nil
 	})
-	if claims, ok := decode.Claims.(jwt.MapClaims); ok {
+	if claims, ok := decodedToken.Claims.(jwt.MapClaims); ok && decodedToken.Valid {
 		id := fmt.Sprintf("%v", claims["id"])
 		return id
 	} else {
