@@ -1,12 +1,24 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"encoding/json"
 
 	"github.com/Amaterasus/direct-apply-backend/api/models"
 )
+
+type formData struct {
+	Name string `json:"name"`
+	Email string `json:"email"`
+	PhoneNumber string `json:"phoneNumber"`
+	Password string `json:"password"`
+	PasswordConfirmation string `json:"passwordConfirmation"`
+	FoundUs string `json:"foundUs"`
+	SendJobMatches bool `json:"sendJobMatches"`
+	AgreedToTerms bool `json:"agreedToTerms"`
+}
 
 func allUsers(w http.ResponseWriter, r *http.Request) {
 
@@ -56,19 +68,15 @@ func wakeup(w http.ResponseWriter, r *http.Request) {
 }
 
 func signUp(w http.ResponseWriter, r *http.Request) {
-	name := r.FormValue("name")
-	email := r.FormValue("email")
-	phoneNumber := r.FormValue("phoneNumber")
-	password := r.FormValue("password")
-	passwordConfirmation := r.FormValue("passwordConfirmation")
-	foundUs := r.FormValue("foundUs")
-	sendJobMatches := r.FormValue("sendJobMatches") == "true"
-	agreedToTerms := r.FormValue("agreedToTerms") == "true"
+
+	var data formData
+
+	json.NewDecoder(r.Body).Decode(&data)
 
 	user := &models.User{}
 
-	if password == passwordConfirmation {
-		newUser := user.Create(name, email, phoneNumber, password, foundUs, sendJobMatches, agreedToTerms)
+	if data.Password == data.PasswordConfirmation && data.AgreedToTerms {
+		newUser := user.Create(data.Name, data.Email, data.PhoneNumber, data.Password, data.FoundUs, data.SendJobMatches, data.AgreedToTerms)
 
 		json.NewEncoder(w).Encode(newUser)
 	} else {
