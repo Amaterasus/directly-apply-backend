@@ -132,6 +132,10 @@ func (user *User) FindUserByID(id string) {
 	defer db.Close()
 
 	db.Where("id = ?", id).Find(&user)
+
+	jwt, _ := GenerateJWT(user.ID)
+
+	user.Jwt = jwt
 }
 
 func (user *User) Create(name, email, phoneNumber, password, foundUs string, sendJobMatches, agreedToTerms bool) interface{} {
