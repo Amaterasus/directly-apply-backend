@@ -19,6 +19,11 @@ type formData struct {
 	AgreedToTerms bool `json:"agreedToTerms"`
 }
 
+type loginDetails struct {
+	Name string `json:"name"`
+	Password string `json:"password"`
+}
+
 func allUsers(w http.ResponseWriter, r *http.Request) {
 
 	user := models.User{}
@@ -46,12 +51,13 @@ func authorised(w http.ResponseWriter, r *http.Request) {
 
 func login(w http.ResponseWriter, r *http.Request) {
 
-	name := r.FormValue("name")
-	password := r.FormValue("password")
+	var data loginDetails
+
+	json.NewDecoder(r.Body).Decode(&data)
 
 	user := models.User{}
 
-	if user.Authorise(name, password) {
+	if user.Authorise(data.Name, data.Password) {
 		json.NewEncoder(w).Encode(user)
 	} else {
 		m := make(map[string]string)
